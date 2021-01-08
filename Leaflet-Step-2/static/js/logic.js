@@ -1,5 +1,8 @@
-// Store our API endpoint inside queryUrl
+// Storing our dataset URLs
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_week.geojson";
+var tectonicPlatesUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json";
+
+var myMap;
 
 // Perform a GET request to the query URL
 d3.json(queryUrl, function(data) {
@@ -7,8 +10,46 @@ d3.json(queryUrl, function(data) {
   createFeatures(data.features);
 });
 
-function createFeatures(earthquakeData) {
+// Perform a GET request to the query URL
+d3.json(tectonicPlatesUrl, function(platesData) {
+  // Once we get a response, send the data.features object to the createFeatures function
+  createTectonicPlates(platesData.features);
+});
 
+// Tectonic Plates Data
+// ---------------------------------------------------------
+function createTectonicPlates(platesData) {
+  // Creating a geoJSON layer with the retrieved data
+  L.geoJson(platesData, {
+    // Style each feature (in this case a neighborhood)
+    style: function(feature) {
+      return {
+        color: "orange",
+        fillOpacity: 0,
+        weight: 1.5
+      };
+    }
+  // // Called on each feature
+  // onEachFeature: function(feature, layer) {
+  //   // Set mouse events to change map styling
+  //   layer.on({
+      
+  //     // When a feature (neighborhood) is clicked, it is enlarged to fit the screen
+  //     click: function(event) {
+  //       myMap.fitBounds(event.target.getBounds());
+  //     }
+  //   });
+    
+  // }
+  // }).addTo(myMap);
+  }).addTo(myMap);
+  console.log("e");
+}
+
+
+// Earthquake Data
+// ---------------------------------------------------------
+function createFeatures(earthquakeData) {
 
   // Function returning marker Style
   function markerStyle(feature) {
@@ -98,7 +139,7 @@ function createFeatures(earthquakeData) {
   };
 
   // Create our map, giving it the streetmap and earthquakes layers to display on load
-  var myMap = L.map("map", {
+  myMap = L.map("map", {
     center: [
       37.09, -95.71
     ],
@@ -106,6 +147,7 @@ function createFeatures(earthquakeData) {
     layers: [satelliteMap, earthquakes]
   });
 
+  // myMap.addLayer([satelliteMap, earthquakes]);
   // Creating a layer control and Passing in our baseMaps and overlayMaps
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
