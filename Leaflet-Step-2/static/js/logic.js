@@ -2,26 +2,20 @@
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_week.geojson";
 var tectonicPlatesUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json";
 
-var myMap;
-
-// Perform a GET request to the query URL
+// Perform a GET request to the query URL for Earthquake Data
 d3.json(queryUrl, function(data) {
   // Once we get a response, send the data.features object to the createFeatures function
   createFeatures(data.features);
 });
 
-// Perform a GET request to the query URL
-d3.json(tectonicPlatesUrl, function(platesData) {
-  // Once we get a response, send the data.features object to the createFeatures function
-  createTectonicPlates(platesData.features);
-});
 
 // Tectonic Plates Data
 // ---------------------------------------------------------
-function createTectonicPlates(platesData) {
+// Perform a GET request to the Tectonic Plates URL
+d3.json(tectonicPlatesUrl, function(platesData) {
   // Creating a geoJSON layer with the retrieved data
-  L.geoJson(platesData, {
-    // Style each feature (in this case a neighborhood)
+  window.faultLines = L.geoJson(platesData, {
+    // Style each feature 
     style: function(feature) {
       return {
         color: "orange",
@@ -29,22 +23,10 @@ function createTectonicPlates(platesData) {
         weight: 1.5
       };
     }
-  // // Called on each feature
-  // onEachFeature: function(feature, layer) {
-  //   // Set mouse events to change map styling
-  //   layer.on({
-      
-  //     // When a feature (neighborhood) is clicked, it is enlarged to fit the screen
-  //     click: function(event) {
-  //       myMap.fitBounds(event.target.getBounds());
-  //     }
-  //   });
-    
-  // }
-  // }).addTo(myMap);
-  }).addTo(myMap);
-  console.log("e");
-}
+
+  });
+});
+
 
 
 // Earthquake Data
@@ -105,6 +87,7 @@ function createFeatures(earthquakeData) {
   attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
   tileSize: 512,
   maxZoom: 18,
+  minZoom: 2,
   zoomOffset: -1,
   id: "light-v10",
   accessToken: API_KEY
@@ -115,6 +98,7 @@ function createFeatures(earthquakeData) {
     attribution: 'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>',
     tileSize: 512,
     maxZoom: 18,
+    minZoom: 2,
     zoomOffset: -1
   });
 
@@ -123,20 +107,10 @@ function createFeatures(earthquakeData) {
     attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
     tileSize: 512,
     maxZoom: 18,
+    minZoom: 2,
     zoomOffset: -1
   });
 
-  // Define a baseMaps object to hold our base layers
-  var baseMaps = {
-    "Satellite": satelliteMap,
-    "Grayscale": lightMap,
-    "Outdoors": outdoorsMap
-  };
-
-  // Create overlay object to hold our overlay layer
-  var overlayMaps = {
-    Earthquakes: earthquakes
-  };
 
   // Create our map, giving it the streetmap and earthquakes layers to display on load
   myMap = L.map("map", {
@@ -144,13 +118,26 @@ function createFeatures(earthquakeData) {
       37.09, -95.71
     ],
     zoom: 4,
-    layers: [satelliteMap, earthquakes]
+    layers: [satelliteMap, earthquakes, faultLines]
   });
 
-  // myMap.addLayer([satelliteMap, earthquakes]);
+  // Define a baseMaps object to hold our base layers
+  var baseMaps = {
+    "<span class='mapOptions'>Satellite</span>": satelliteMap,
+    "<span class='mapOptions'>Grayscale</span>": lightMap,
+    "<span class='mapOptions'>Outdoors</span>": outdoorsMap
+  };
+
+  // Create overlay object to hold our overlay layer
+  var overlayMaps = {
+    "<span class='mapOptions'>Fault Lines</span>": faultLines,
+    "<span class='mapOptions'>Earthquakes</span>": earthquakes
+  };
+
+
   // Creating a layer control and Passing in our baseMaps and overlayMaps
   L.control.layers(baseMaps, overlayMaps, {
-    collapsed: false
+    collapsed: false,
   }).addTo(myMap);
 
   // Adding Legend to the Map
