@@ -118,7 +118,7 @@ function createFeatures(earthquakeData) {
       37.09, -95.71
     ],
     zoom: 4,
-    layers: [satelliteMap, earthquakes, faultLines]
+    layers: [satelliteMap, faultLines, earthquakes]
   });
 
   // Define a baseMaps object to hold our base layers
